@@ -16,23 +16,15 @@
 package com.buddycloud.friendfinder.provider;
 
 import java.util.List;
-import java.util.Properties;
-
-import com.buddycloud.friendfinder.model.Friend;
 
 /**
  * @author Abmar
  *
  */
-public interface ContactProvider {
+public interface FriendFinder {
 
-	String getAuthenticationURL(Properties properties, String userJid)
-			throws Exception;
+	String getAuthenticationURL(String userJid) throws Exception;
 
-	List<Friend> getFriends(Properties properties, String userJid,
-			String accessToken) throws Exception;
-	
-	void inviteFriend(Properties properties, Friend friend, String userJid,
-			String accessToken) throws Exception;
+	List<String> findFriends(String userJid, String accessToken) throws Exception;
 	
 }

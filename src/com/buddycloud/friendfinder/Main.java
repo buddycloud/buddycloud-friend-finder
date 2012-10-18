@@ -15,7 +15,12 @@
  */
 package com.buddycloud.friendfinder;
 
+import java.io.FileInputStream;
+import java.util.Properties;
+
 import org.jamppa.component.XMPPComponent;
+
+import com.buddycloud.friendfinder.provider.FacebookFinder;
 
 
 /**
@@ -24,13 +29,19 @@ import org.jamppa.component.XMPPComponent;
  */
 public class Main {
 
-	public static void main(String[] args) {
-		XMPPComponent xmppComponent = new XMPPComponent("configuration.properties");
+	public static void main(String[] args) throws Exception {
+		
+		Properties properties = new Properties();
+		properties.load(new FileInputStream("configuration.properties"));
+		
+		XMPPComponent xmppComponent = new XMPPComponent(properties);
 		xmppComponent.setDescription("buddycloud's friend finder");
 		xmppComponent.setName("buddycloud's friend finder ");
 		xmppComponent.setDiscoInfoIdentityCategory("Friend finder");
 		xmppComponent.setDiscoInfoIdentityCategoryType("Directory");
 		xmppComponent.run();
+		
+		new FacebookFinder(properties, xmppComponent);
 	}
 	
 }

@@ -13,47 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.buddycloud.friendfinder.model;
+package com.buddycloud.friendfinder.provider;
+
+import java.util.Properties;
+
+import org.jamppa.component.PacketSender;
 
 /**
  * @author Abmar
  *
  */
-public class Friend {
+public abstract class AbstractFriendFinder implements FriendFinder {
 
-	private String name;
-	private String id;
+	private final Properties properties;
+	private final PacketSender packetSender;
 	
-	public Friend(String name, String id) {
-		this.name = name;
-		this.id = id;
-	}
-
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
+	public AbstractFriendFinder(Properties properties, PacketSender packetSender) {
+		this.properties = properties;
+		this.packetSender = packetSender;
 	}
 	
 	/**
-	 * @param name the name to set
+	 * @return the properties
 	 */
-	public void setName(String name) {
-		this.name = name;
+	public Properties getProperties() {
+		return properties;
 	}
 	
 	/**
-	 * @return the id
+	 * @return the packetSender
 	 */
-	public String getId() {
-		return id;
-	}
-	
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
+	public PacketSender getPacketSender() {
+		return packetSender;
 	}
 }
