@@ -17,16 +17,12 @@ package com.buddycloud.friendfinder.provider;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 
-import org.dom4j.Element;
 import org.jamppa.component.PacketSender;
-import org.xmpp.packet.IQ;
-import org.xmpp.packet.Packet;
 
 import com.buddycloud.friendfinder.Configuration;
+import com.buddycloud.friendfinder.HashUtils;
 import com.buddycloud.friendfinder.HttpUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -36,23 +32,19 @@ import com.google.gson.JsonObject;
  * @author Abmar
  *
  */
-public class FacebookFinder extends AbstractFriendFinder {
+public class Facebook extends AbstractContactProvider {
 
 	private static final String APPID_PROP = "facebook.appId";
 	private static final String APPSECRET_PROP = "facebook.appSecret";
 	private static final String CODE_PROP = "facebook.code";
-	private static final String CHANNELDIR_ADDRESS_PROP = "buddycloud.channeldir";
 	
 	private static final String GRAPH_URL = "https://graph.facebook.com";
 	
-	private static final String RSM_NS = "http://jabber.org/protocol/rsm";
-	private static final String METADATA_NS = "http://buddycloud.com/channel_directory/metadata_query";
-
 	/**
 	 * @param properties
 	 * @param packetSender
 	 */
-	public FacebookFinder(Properties properties, PacketSender packetSender) {
+	public Facebook(Properties properties, PacketSender packetSender) {
 		super(properties, packetSender);
 	}
 
@@ -80,38 +72,23 @@ public class FacebookFinder extends AbstractFriendFinder {
 	}
 
 	@Override
-	public List<String> findFriends(String userJid, String accessToken) throws Exception {
+	public ContactProfile getProfile(String accessToken) throws Exception {
+		
+		String meURL = GRAPH_URL + "/me?fields=id&access_token=" + accessToken;
+		String myId = HttpUtils.consumeJSON(meURL).getAsJsonObject().get("id").getAsString();
+		
+		ContactProfile contactProfile = new ContactProfile(HashUtils.encodeSHA256(myId));
 		
 		String friendURL = GRAPH_URL + "/me/friends?access_token=" + accessToken;
 		JsonObject friendsJson = HttpUtils.consumeJSON(friendURL).getAsJsonObject();
 		
-		List<String> friendsResponse = new LinkedList<String>();
-		
 		JsonArray friendsArray = friendsJson.get("data").getAsJsonArray();
 		for (JsonElement friendJson : friendsArray) {
 			JsonObject friendObject = friendJson.getAsJsonObject();
-			String friendName = friendObject.get("name").getAsString();
-			String friendJid = searchPersonalChannel(friendName);
-			friendsResponse.add(friendJid);
+			String friendId = friendObject.get("id").getAsString();
+			contactProfile.addFriendHash(HashUtils.encodeSHA256(friendId));
 		}
 		
-		return friendsResponse;
+		return contactProfile;
 	}
-
-	private String searchPersonalChannel(String name) {
-		IQ iq = new IQ();
-		iq.setTo(getProperties().getProperty(CHANNELDIR_ADDRESS_PROP));
-		
-		Element queryEl = iq.getElement().addElement("query", METADATA_NS);
-		queryEl.addElement("search").setText(name);
-		Element rsmEl = queryEl.addElement("set", RSM_NS);
-		rsmEl.addElement("max").setText("1");
-		
-		Packet packet = getPacketSender().syncSendPacket(iq);
-		Element itemEl = packet.getElement().element("query").element("item");
-		String jid = itemEl.attribute("jid").getValue();
-		
-		return jid;
-	}
-
 }

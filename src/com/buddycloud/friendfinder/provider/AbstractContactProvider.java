@@ -23,12 +23,12 @@ import org.jamppa.component.PacketSender;
  * @author Abmar
  *
  */
-public abstract class AbstractFriendFinder implements FriendFinder {
+public abstract class AbstractContactProvider implements ContactProvider {
 
 	private final Properties properties;
 	private final PacketSender packetSender;
 	
-	public AbstractFriendFinder(Properties properties, PacketSender packetSender) {
+	public AbstractContactProvider(Properties properties, PacketSender packetSender) {
 		this.properties = properties;
 		this.packetSender = packetSender;
 	}

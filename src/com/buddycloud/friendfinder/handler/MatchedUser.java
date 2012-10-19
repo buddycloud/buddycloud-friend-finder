@@ -13,18 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.buddycloud.friendfinder.provider;
-
-import java.util.List;
+package com.buddycloud.friendfinder.handler;
 
 /**
  * @author Abmar
  *
  */
-public interface FriendFinder {
+public class MatchedUser {
 
-	String getAuthenticationURL(String userJid) throws Exception;
-
-	List<String> findFriends(String userJid, String accessToken) throws Exception;
+	private final String jid;
+	private final String hash;
 	
+	public MatchedUser(String jid, String hash) {
+		this.jid = jid;
+		this.hash = hash;
+	}
+	
+	/**
+	 * @return the jid
+	 */
+	public String getJid() {
+		return jid;
+	}
+	
+	/**
+	 * @return the hash
+	 */
+	public String getHash() {
+		return hash;
+	}
 }

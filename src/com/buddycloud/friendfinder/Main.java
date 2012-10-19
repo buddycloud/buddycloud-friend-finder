@@ -20,7 +20,8 @@ import java.util.Properties;
 
 import org.jamppa.component.XMPPComponent;
 
-import com.buddycloud.friendfinder.provider.FacebookFinder;
+import com.buddycloud.friendfinder.handler.MatchContactFromFacebookHandler;
+import com.buddycloud.friendfinder.handler.MatchContactHandler;
 
 
 /**
@@ -41,7 +42,10 @@ public class Main {
 		xmppComponent.setDiscoInfoIdentityCategoryType("Directory");
 		xmppComponent.run();
 		
-		new FacebookFinder(properties, xmppComponent);
+		xmppComponent.addGetHandler(new MatchContactHandler());
+		xmppComponent.addGetHandler(new MatchContactFromFacebookHandler());
+		
+		
 	}
 	
 }
