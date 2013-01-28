@@ -15,14 +15,14 @@
  */
 package com.buddycloud.friendfinder.handler;
 
-import com.buddycloud.friendfinder.provider.ContactProvider;
+import com.buddycloud.friendfinder.provider.OAuth2ContactProvider;
 import com.buddycloud.friendfinder.provider.Facebook;
 
 /**
  * @author Abmar
  *
  */
-public class MatchContactFromFacebookHandler extends MatchContactFromContactProviderHandler {
+public class MatchContactFromFacebookHandler extends MatchContactFromContactProviderHandler<OAuth2ContactProvider> {
 
 	private static final String NAMESPACE = "http://buddycloud.com/friend_finder/match_facebook";
 	
@@ -34,7 +34,7 @@ public class MatchContactFromFacebookHandler extends MatchContactFromContactProv
 	 * @see com.buddycloud.friendfinder.handler.MatchContactFromContactProviderHandler#createProvider()
 	 */
 	@Override
-	protected ContactProvider createProvider() {
+	protected OAuth2ContactProvider createProvider() {
 		return new Facebook(getProperties(), getPacketSender());
 	}
 }

@@ -19,11 +19,19 @@ import java.util.Properties;
 
 import org.jamppa.component.PacketSender;
 
+import com.buddycloud.friendfinder.HashUtils;
+
+import twitter4j.IDs;
+import twitter4j.TwitterFactory;
+import twitter4j.conf.ConfigurationBuilder;
+
 /**
  * @author Abmar
  *
  */
-public class Twitter extends AbstractContactProvider {
+public class Twitter extends AbstractContactProvider implements OAuth1ContactProvider {
+
+	private static final String PROVIDER_NAME = "twitter";
 
 	/**
 	 * @param properties
@@ -34,19 +42,36 @@ public class Twitter extends AbstractContactProvider {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.buddycloud.friendfinder.provider.ContactProvider#getAuthenticationURL(java.lang.String)
-	 */
-	@Override
-	public String getAuthenticationURL(String userJid) throws Exception {
-		return null;
-	}
-
-	/* (non-Javadoc)
 	 * @see com.buddycloud.friendfinder.provider.ContactProvider#getProfile(java.lang.String)
 	 */
 	@Override
-	public ContactProfile getProfile(String accessToken) throws Exception {
-		return null;
+	public ContactProfile getProfile(String accessToken, String accessTokenSecret) throws Exception {
+		
+		ConfigurationBuilder cb = new ConfigurationBuilder();
+		cb.setDebugEnabled(true)
+		  .setOAuthConsumerKey(getProperties().getProperty("twitter.consumerKey"))
+		  .setOAuthConsumerSecret(getProperties().getProperty("twitter.consumerSecret"))
+		  .setOAuthAccessToken(accessToken)
+		  .setOAuthAccessTokenSecret(accessTokenSecret);
+		TwitterFactory tf = new TwitterFactory(cb.build());
+		twitter4j.Twitter twitter = tf.getInstance();
+		
+		Long myId = twitter.getId();
+		ContactProfile contactProfile = new ContactProfile(
+				HashUtils.encodeSHA256(PROVIDER_NAME, myId.toString()));
+		long nextCursor = -1;
+		while (true) {
+			IDs friendsIDs = twitter.getFollowersIDs(nextCursor);
+			for (Long friendId : friendsIDs.getIDs()) {
+				contactProfile.addFriendHash(
+						HashUtils.encodeSHA256(PROVIDER_NAME, friendId.toString()));
+			}
+			if (!friendsIDs.hasNext()) {
+				break;
+			}
+			nextCursor = friendsIDs.getNextCursor();
+		}
+		return contactProfile;
 	}
 
 }

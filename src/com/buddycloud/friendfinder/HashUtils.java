@@ -44,7 +44,7 @@ public class HashUtils {
 		PreparedStatement statement = null;
 		try {
 			statement = dataSource.prepareStatement(
-					"INSERT INTO contact-matches(credential-hash, jid) VALUES (?, ?)", 
+					"INSERT INTO \"contact-matches\"(\"credential-hash\", \"jid\") VALUES (?, ?)", 
 					hash, jid);
 			statement.execute();
 			return true;
@@ -61,7 +61,7 @@ public class HashUtils {
 		PreparedStatement statement = null;
 		try {
 			statement = dataSource.prepareStatement(
-					"SELECT jid FROM contact-matches WHERE credential-hash=?", 
+					"SELECT \"jid\" FROM \"contact-matches\" WHERE \"credential-hash\"=?", 
 					hash);
 			ResultSet resultSet = statement.executeQuery();
 			if (resultSet.next()) {
@@ -80,6 +80,14 @@ public class HashUtils {
 			UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		md.update(str.getBytes("UTF-8"));
+		byte[] digest = md.digest();
+		return Base64.encodeBase64String(digest);
+	}
+	
+	public static String encodeSHA256(String provider, String contactId)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		md.update((provider + ":" + contactId).getBytes("UTF-8"));
 		byte[] digest = md.digest();
 		return Base64.encodeBase64String(digest);
 	}

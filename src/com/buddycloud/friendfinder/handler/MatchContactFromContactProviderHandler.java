@@ -25,15 +25,16 @@ import org.xmpp.packet.IQ;
 
 import com.buddycloud.friendfinder.HashUtils;
 import com.buddycloud.friendfinder.provider.ContactProfile;
-import com.buddycloud.friendfinder.provider.ContactProvider;
+import com.buddycloud.friendfinder.provider.OAuth1ContactProvider;
+import com.buddycloud.friendfinder.provider.OAuth2ContactProvider;
 
 /**
  * @author Abmar
  *
  */
-public abstract class MatchContactFromContactProviderHandler extends AbstractQueryHandler {
+public abstract class MatchContactFromContactProviderHandler<T> extends AbstractQueryHandler {
 
-	private ContactProvider contactProvider;
+	private T contactProvider;
 	
 	public MatchContactFromContactProviderHandler(String namespace) {
 		super(namespace);
@@ -46,9 +47,21 @@ public abstract class MatchContactFromContactProviderHandler extends AbstractQue
 	public IQ handle(IQ iq) {
 		Element queryElement = iq.getElement().element("query");
 		String accessToken = queryElement.element("access_token").getText();
+		
+		Element accessTokenSecretEl = queryElement.element("access_token_secret");
+		String accessTokenSecret = null;
+		if (accessTokenSecretEl != null) {
+			accessTokenSecret = accessTokenSecretEl.getText();
+		}
+		
 		ContactProfile profile = null;
+			
 		try {
-			profile = getProvider().getProfile(accessToken);
+			if (accessTokenSecret != null) {
+				profile = ((OAuth1ContactProvider)getProvider()).getProfile(accessToken, accessTokenSecret);
+			} else {
+				profile = ((OAuth2ContactProvider)getProvider()).getProfile(accessToken);
+			}
 		} catch (Exception e) {
 			return XMPPUtils.error(iq, 
 					"Could not retrieve contact profile. Namespace [" + getNamespace() + "]", 
@@ -79,7 +92,7 @@ public abstract class MatchContactFromContactProviderHandler extends AbstractQue
 		return result;
 	}
 	
-	private ContactProvider getProvider() {
+	private T getProvider() {
 		if (contactProvider == null) {
 			contactProvider = createProvider();
 		}
@@ -89,5 +102,5 @@ public abstract class MatchContactFromContactProviderHandler extends AbstractQue
 	/**
 	 * @return
 	 */
-	protected abstract ContactProvider createProvider();
+	protected abstract T createProvider();
 }

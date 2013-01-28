@@ -26,6 +26,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -46,6 +49,12 @@ public class HttpUtils {
 				new InputStreamReader(httpResponse.getEntity().getContent())));
 		
 		return parse;
+	}
+	
+	public static Element consumeXML(String URL) throws Exception {
+		SAXReader reader = new SAXReader();
+        Document document = reader.read(new java.net.URL(URL));
+		return document.getRootElement();
 	}
 	
 	public static void post(String URL, Map<String, String> params) throws Exception {

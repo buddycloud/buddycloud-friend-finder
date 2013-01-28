@@ -15,13 +15,10 @@
  */
 package com.buddycloud.friendfinder.provider;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Properties;
 
 import org.jamppa.component.PacketSender;
 
-import com.buddycloud.friendfinder.Configuration;
 import com.buddycloud.friendfinder.HashUtils;
 import com.buddycloud.friendfinder.HttpUtils;
 import com.google.gson.JsonArray;
@@ -32,13 +29,10 @@ import com.google.gson.JsonObject;
  * @author Abmar
  *
  */
-public class Facebook extends AbstractContactProvider {
+public class Facebook extends AbstractContactProvider implements OAuth2ContactProvider {
 
-	private static final String APPID_PROP = "facebook.appId";
-	private static final String APPSECRET_PROP = "facebook.appSecret";
-	private static final String CODE_PROP = "facebook.code";
-	
 	private static final String GRAPH_URL = "https://graph.facebook.com";
+	private static final String PROVIDER_NAME = "facebook";
 	
 	/**
 	 * @param properties
@@ -48,45 +42,35 @@ public class Facebook extends AbstractContactProvider {
 		super(properties, packetSender);
 	}
 
-	
-	@Override
-	public String getAuthenticationURL(String userJid) 
-			throws UnsupportedEncodingException {
-		
-		String appId = getProperties().getProperty(APPID_PROP);
-		String appSecret = getProperties().getProperty(APPSECRET_PROP);
-		String code = getProperties().getProperty(CODE_PROP);
-		
-		String callbackURL = getProperties().getProperty(Configuration.CALLBACK_URL);
-		callbackURL += "?provider=facebook&user_jid=" + userJid;
-		
-		String callbackURLEncoded = URLEncoder.encode(callbackURL, "UTF-8");
-		
-		String returnURL = GRAPH_URL + "/oauth/access_token" +
-			"?client_id=" + appId + 
-			"&redirect_uri=" + callbackURLEncoded + 
-			"&client_secret=" + appSecret + 
-			"&code=" + code + "&display=popup";
-		
-		return returnURL;
-	}
-
 	@Override
 	public ContactProfile getProfile(String accessToken) throws Exception {
 		
-		String meURL = GRAPH_URL + "/me?fields=id&access_token=" + accessToken;
-		String myId = HttpUtils.consumeJSON(meURL).getAsJsonObject().get("id").getAsString();
+		StringBuilder meURLBuilder = new StringBuilder(GRAPH_URL);
+		meURLBuilder.append("/me?fields=id&access_token=").append(accessToken);
+		String myId = HttpUtils.consumeJSON(meURLBuilder.toString())
+				.getAsJsonObject().get("id").getAsString();
+
+		ContactProfile contactProfile = new ContactProfile(
+				HashUtils.encodeSHA256(PROVIDER_NAME, myId));
 		
-		ContactProfile contactProfile = new ContactProfile(HashUtils.encodeSHA256(myId));
+		StringBuilder friendsURLBuilder = new StringBuilder(GRAPH_URL);
+		friendsURLBuilder.append("/me/friends?fields=id&access_token=").append(accessToken);
 		
-		String friendURL = GRAPH_URL + "/me/friends?access_token=" + accessToken;
-		JsonObject friendsJson = HttpUtils.consumeJSON(friendURL).getAsJsonObject();
-		
-		JsonArray friendsArray = friendsJson.get("data").getAsJsonArray();
-		for (JsonElement friendJson : friendsArray) {
-			JsonObject friendObject = friendJson.getAsJsonObject();
-			String friendId = friendObject.get("id").getAsString();
-			contactProfile.addFriendHash(HashUtils.encodeSHA256(friendId));
+		while (true) {
+			JsonObject friendsJson = HttpUtils.consumeJSON(friendsURLBuilder.toString()).getAsJsonObject();
+			
+			JsonArray friendsArray = friendsJson.get("data").getAsJsonArray();
+			for (JsonElement friendJson : friendsArray) {
+				JsonObject friendObject = friendJson.getAsJsonObject();
+				String friendId = friendObject.get("id").getAsString();
+				contactProfile.addFriendHash(
+						HashUtils.encodeSHA256(PROVIDER_NAME, friendId));
+			}
+			JsonObject paging = friendsJson.get("paging").getAsJsonObject();
+			if (!paging.has("next")) {
+				break;
+			}
+			friendsURLBuilder = new StringBuilder(paging.get("next").getAsString());
 		}
 		
 		return contactProfile;

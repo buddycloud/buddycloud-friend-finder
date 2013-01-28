@@ -15,35 +15,13 @@
  */
 package com.buddycloud.friendfinder.provider;
 
-import java.util.Properties;
-
-import org.jamppa.component.PacketSender;
 
 /**
  * @author Abmar
  *
  */
-public abstract class AbstractContactProvider {
+public interface OAuth1ContactProvider {
 
-	private final Properties properties;
-	private final PacketSender packetSender;
+	ContactProfile getProfile(String accessToken, String accessTokenSecret) throws Exception;
 	
-	public AbstractContactProvider(Properties properties, PacketSender packetSender) {
-		this.properties = properties;
-		this.packetSender = packetSender;
-	}
-	
-	/**
-	 * @return the properties
-	 */
-	public Properties getProperties() {
-		return properties;
-	}
-	
-	/**
-	 * @return the packetSender
-	 */
-	public PacketSender getPacketSender() {
-		return packetSender;
-	}
 }

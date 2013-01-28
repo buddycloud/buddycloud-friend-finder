@@ -15,18 +15,18 @@
  */
 package com.buddycloud.friendfinder.handler;
 
-import com.buddycloud.friendfinder.provider.OAuth1ContactProvider;
-import com.buddycloud.friendfinder.provider.Twitter;
+import com.buddycloud.friendfinder.provider.OAuth2ContactProvider;
+import com.buddycloud.friendfinder.provider.Gmail;
 
 /**
  * @author Abmar
  *
  */
-public class MatchContactFromTwitterHandler extends MatchContactFromContactProviderHandler<OAuth1ContactProvider> {
+public class MatchContactFromGmailHandler extends MatchContactFromContactProviderHandler<OAuth2ContactProvider> {
 
-	private static final String NAMESPACE = "http://buddycloud.com/friend_finder/match_twitter";
+	private static final String NAMESPACE = "http://buddycloud.com/friend_finder/match_gmail";
 	
-	public MatchContactFromTwitterHandler() {
+	public MatchContactFromGmailHandler() {
 		super(NAMESPACE);
 	}
 
@@ -34,7 +34,7 @@ public class MatchContactFromTwitterHandler extends MatchContactFromContactProvi
 	 * @see com.buddycloud.friendfinder.handler.MatchContactFromContactProviderHandler#createProvider()
 	 */
 	@Override
-	protected OAuth1ContactProvider createProvider() {
-		return new Twitter(getProperties(), getPacketSender());
+	protected OAuth2ContactProvider createProvider() {
+		return new Gmail(getProperties(), getPacketSender());
 	}
 }

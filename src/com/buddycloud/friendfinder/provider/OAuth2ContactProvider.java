@@ -20,9 +20,7 @@ package com.buddycloud.friendfinder.provider;
  * @author Abmar
  *
  */
-public interface ContactProvider {
-
-	String getAuthenticationURL(String userJid) throws Exception;
+public interface OAuth2ContactProvider {
 
 	ContactProfile getProfile(String accessToken) throws Exception;
 	

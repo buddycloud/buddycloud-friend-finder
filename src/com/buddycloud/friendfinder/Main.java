@@ -21,6 +21,8 @@ import java.util.Properties;
 import org.jamppa.component.XMPPComponent;
 
 import com.buddycloud.friendfinder.handler.MatchContactFromFacebookHandler;
+import com.buddycloud.friendfinder.handler.MatchContactFromGmailHandler;
+import com.buddycloud.friendfinder.handler.MatchContactFromTwitterHandler;
 import com.buddycloud.friendfinder.handler.MatchContactHandler;
 
 
@@ -44,7 +46,8 @@ public class Main {
 		
 		xmppComponent.addGetHandler(new MatchContactHandler());
 		xmppComponent.addGetHandler(new MatchContactFromFacebookHandler());
-		
+		xmppComponent.addGetHandler(new MatchContactFromGmailHandler());
+		xmppComponent.addGetHandler(new MatchContactFromTwitterHandler());
 		
 	}
 	
