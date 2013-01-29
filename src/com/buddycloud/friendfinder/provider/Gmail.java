@@ -49,6 +49,8 @@ public class Gmail extends AbstractContactProvider implements OAuth2ContactProvi
 		ContactProfile contactProfile = null;
 		int startIndex = 1;
 		
+		String myEmail = null;
+		
 		while (true) {
 			StringBuilder urlBuilder = new StringBuilder(GOOGLE_FEED);
 			urlBuilder.append("?start-index=").append(startIndex);
@@ -59,9 +61,9 @@ public class Gmail extends AbstractContactProvider implements OAuth2ContactProvi
 			Element xmlContacts = HttpUtils.consumeXML(contactsURL);
 			
 			if (firstPage) {
-				String myId = xmlContacts.element("id").getText();
+				myEmail = xmlContacts.element("id").getText();
 				contactProfile = new ContactProfile(
-						HashUtils.encodeSHA256(PROVIDER_NAME, myId));
+						HashUtils.encodeSHA256(PROVIDER_NAME, myEmail));
 			}
 			
 			if (xmlContacts.element("entry") == null) {
@@ -74,9 +76,12 @@ public class Gmail extends AbstractContactProvider implements OAuth2ContactProvi
 				if (emailEl == null) {
 					continue;
 				}
-				String friendId = emailEl.attributeValue("address");
+				String friendEmail = emailEl.attributeValue("address");
+				if (friendEmail.equals(myEmail)) {
+					continue;
+				}
 				contactProfile.addFriendHash(HashUtils.encodeSHA256(
-						PROVIDER_NAME, friendId));
+						PROVIDER_NAME, friendEmail));
 			}
 			
 			startIndex += PAGE_SIZE;
