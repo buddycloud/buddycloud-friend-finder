@@ -1,7 +1,3 @@
-buddycloud-friend-finder
-========================
-
-Search existing social networks for friends and invite them to buddycloud. And preserve your privacy.
 Aim
 ---
 
@@ -37,10 +33,11 @@ User Flow
 
 Creating Hashes
 ---------------
-
--   sha256(email:name@domain.com)
--   **sha256**(phone:<last 6 digits of phone number with spaces removed>)
--   **sha256**(**lowercase**(vnd.android.cursor.item/vnd.fm.last.android.profile<space>**remove-white-space**(music-lover)))
+```
+ sha256(email:name@domain.com)
+ **sha256**(phone:<last 6 digits of phone number with spaces removed>)
+ **sha256**(**lowercase**(vnd.android.cursor.item/vnd.fm.last.android.profile<space>**remove-white-space**(music-lover)))
+```
 
 Database Schema
 ---------------
@@ -138,8 +135,3 @@ Reference Material
 -   <http://www.quora.com/User-Acquisition/What-is-the-best-invite-a-friend-flow-for-mobile>
 -   <http://mattgemmell.com/2012/02/11/hashing-for-privacy-in-social-apps/>
 -   <http://www.h-online.com/security/news/item/Path-iOS-app-now-hashes-address-book-data-1511858.html>
-
-Example Screen
---------------
-
-![](Add-Friends-4_original.jpeg "Add-Friends-4_original.jpeg")
