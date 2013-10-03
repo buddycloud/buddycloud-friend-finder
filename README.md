@@ -2,39 +2,50 @@ buddycloud-friend-finder
 ========================
 
 Search existing social networks for friends and invite them to buddycloud. And preserve your privacy.
+Aim
+---
 
-==Aim==
+-   serve mobile clients with an address book to find contacts on
+    buddycloud
+-   quickly hook up new users with existing contacts
+-   present them with a list "these are channels you might be interested
+    in"
 
-* serve mobile clients with an address book to find contacts on buddycloud
-* quickly hook up new users with existing contacts
-* present them with a list "these are channels you might be interested in"
+Acceessing the Service
+----------------------
 
-==Acceessing the Service==
+This is an open service for any client and users on any domain to query.
 
-This is an open service for any client and users on any domain to query. 
+The service runs at **friend-finder.buddycloud.com**
 
-The service runs at '''friend-finder.buddycloud.com'''
+User Flow
+---------
 
-== User Flow == 
+1.  mobile clients contain identifiers from different sources (email,
+    phone, twitter, skype etc)
+2.  The client can, with the user's permission, read their address book
+3.  client sends a SHA256 hash of the contact mime type and the contact
+    identifier to the server. For example to send buddycloud's twitter
+    handle, SHA256(vnd.twitter.profile<space>buddycloud)
+4.  the server matches the hashes with existing hashes and sends the
+    client
+    1.  a list of jids to the client together with,
+    2.  the matching hash
 
-# mobile clients contain identifiers from different sources (email, phone, twitter, skype etc)
-# The client can, with the user's permission, read their address book
-# client sends a SHA256 hash of the contact mime type and the contact identifier to the server. For example to send buddycloud's twitter handle, SHA256(vnd.twitter.profile<space>buddycloud)
-# the server matches the hashes with existing hashes and sends the client
-## a list of jids to the client together with,
-## the matching hash
-# the client displays looks up the matching hash from the address book
-# the client displays the avatar shown  the jid with a "follow" button
+5.  the client displays looks up the matching hash from the address book
+6.  the client displays the avatar shown the jid with a "follow" button
 
-== Creating Hashes ==
+Creating Hashes
+---------------
 
-* sha256(email:name@domain.com)
-* '''sha256'''(phone:<last 6 digits of phone number with spaces removed>)
-* '''sha256'''('''lowercase'''(vnd.android.cursor.item/vnd.fm.last.android.profile<space>'''remove-white-space'''(music-lover)))
+-   sha256(email:name@domain.com)
+-   **sha256**(phone:<last 6 digits of phone number with spaces removed>)
+-   **sha256**(**lowercase**(vnd.android.cursor.item/vnd.fm.last.android.profile<space>**remove-white-space**(music-lover)))
 
-== Database Schema ==
+Database Schema
+---------------
 
-<syntaxhighlight lang=sql>
+~~~~ {.sql}
 CREATE TABLE "contact-matches" (
     "jid" character varying(256) NOT NULL,
     "credential-hash" character varying(64) NOT NULL
@@ -48,12 +59,14 @@ CREATE INDEX "credential-hash-column-index" ON "contact-matches" USING btree ("c
 
 COMMENT ON COLUMN "contact-matches".jid IS 'The sending JID';
 COMMENT ON COLUMN "contact-matches"."credential-hash" IS 'https://buddycloud.org/wiki/Contact_matching#making_hashes';
-</syntaxhighlight>
+~~~~
 
-== XMPP Stanzas ==
+XMPP Stanzas
+------------
 
 The client sends
-<syntaxhighlight lang=xml>
+
+~~~~ {.xml}
 <iq to="friendfinder.buddycloud.com" from="james@giantpeach.com" type="get" id="qadfqadfa">
             <!-- we need something in here to say "this is me, these are my hashes" -->
             <item item-hash="da39a3ee5e6b4b0d3255bfef95601890afd80709" me="true">
@@ -66,24 +79,30 @@ The client sends
             <item item-hash="0edfd414c0ea0c7e8ff93433673ddf810e00210b">
             <item item-hash="6b0b106cfd2beab2e846606e21cb353a3a83c4c9">
 </iq>
-</syntaxhighlight>
+~~~~
 
 Server returns a list of possible channels
-<syntaxhighlight lang=xml>
+
+~~~~ {.xml}
 <iq to="james@giantpeach.com" from="friendfinder.buddycloud.com" type="set" id="qadfqadfa">
             <item jid="friend@buddycloud.com" matched-hash="0164244061e12f1b374e0133b72bd7d0f3930d58">
             <item jid="probably-a-friend@buddycloud.com" matched-hash="0164244061e12f1b374e0133b72bd7d0f3930d58">
             <item jid="another-probable-friend@example.com" matched-hash="0164244061e12f1b374e0133b72bd7d0f3930d58" >
  </iq>
-</syntaxhighlight>
+~~~~
 
-NOTE: returning the matched hash enables looking up the contact details on the client and displaying the icon in the returned list of channels to follow
+NOTE: returning the matched hash enables looking up the contact details
+on the client and displaying the icon in the returned list of channels
+to follow
 
-== Finding the Account Identifier on Android==
+Finding the Account Identifier on Android
+-----------------------------------------
 
-On Android, to find the mime types for each contact type, use the following SQL (on a rooted phone). Other mobile platforms should use the same mimetypes.
+On Android, to find the mime types for each contact type, use the
+following SQL (on a rooted phone). Other mobile platforms should use the
+same mimetypes.
 
-<syntaxhighlight lang=sql>
+~~~~ {.sql}
 sqlite> select * from mimetypes;
 1|vnd.android.cursor.item/email_v2
 2|vnd.android.cursor.item/im
@@ -111,10 +130,16 @@ sqlite> select * from mimetypes;
 
 sqlite> select * from data where mimetype_id = 15;
 2810||15|487|0|0|0|2|100000004412355|Facebook-Profil|Profil anzeigen||||||||||||||||
-</syntaxhighlight>
+~~~~
 
-== Reference Material == 
+Reference Material
+------------------
 
-* http://www.quora.com/User-Acquisition/What-is-the-best-invite-a-friend-flow-for-mobile
-* http://mattgemmell.com/2012/02/11/hashing-for-privacy-in-social-apps/
-* http://www.h-online.com/security/news/item/Path-iOS-app-now-hashes-address-book-data-1511858.html
+-   <http://www.quora.com/User-Acquisition/What-is-the-best-invite-a-friend-flow-for-mobile>
+-   <http://mattgemmell.com/2012/02/11/hashing-for-privacy-in-social-apps/>
+-   <http://www.h-online.com/security/news/item/Path-iOS-app-now-hashes-address-book-data-1511858.html>
+
+Example Screen
+--------------
+
+![](Add-Friends-4_original.jpeg "Add-Friends-4_original.jpeg")
