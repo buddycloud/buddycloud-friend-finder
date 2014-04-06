@@ -7,7 +7,7 @@ Aim
 -   present them with a list "these are channels you might be interested
     in"
 
-Acceessing the Service
+Accessing the Service
 ----------------------
 
 This is an open service for any client and users on any domain to query.
