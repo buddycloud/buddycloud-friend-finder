@@ -12,7 +12,7 @@ Accessing the Service
 
 This is an open service for any client and users on any domain to query.
 
-The service runs at **friend-finder.buddycloud.com**
+The service runs as an XMPP component at ``friend-finder.buddycloud.com``
 
 User Flow
 ---------
